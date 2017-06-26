@@ -1,0 +1,31 @@
+<!-- views/index.ejs -->
+<!doctype html>
+<html>
+<head>
+    <title>Test</title>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css"> <!-- load bootstrap css -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"> <!-- load fontawesome -->
+    <style>
+        body        { padding-top:80px; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="jumbotron text-center">
+        <h1><span class="fa fa-lock"></span> Database Test</h1>
+    <table id="myTable">
+      <tr>
+        <th> Manga Links </th>
+      </tr>
+        <% mangas.forEach(function(item, index) { %>
+          <tr>
+            <td> <a href="http://minisharks.asuscomm.com:8095/batoto/manga/<%= item.mangaUrl %>"> <%= item.mangaUrl %> </td>
+          </tr>
+        <% }); %>
+    </table>
+<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script src="/js/main.js"></script>
+</div>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!-- views/index.ejs -->
+<!doctype html>
+<html>
+<head>
+    <title>Node Authentication</title>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css"> <!-- load bootstrap css -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"> <!-- load fontawesome -->
+    <style>
+* {
+  padding: 0;
+  margin: 0;
+}
+.fit {
+  max-width: 100%;
+  max-height: 100%;
+}
+.center {
+  display: block;
+  margin: auto;
+}
+</style>
+</head>
+<body>
+<img id='imu' src='http://2.bp.blogspot.com/oAot4jfGsjkaB45zMkzSZzIrRxrHFypjCwWS7GI7s8wNR5DRSmKMj2rSPXhzzf6Zyq7YYEA2SiIGzoX2o8T0mHnXBh-go6YOMBF44bBoFOXVAHcegKsmbAtRpRQeiuGyuEmwNw=s0?title=002_1489600716.png'/>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script type="text/javascript" language="JavaScript">
+function set_body_height()
+{
+    var wh = $(window).height();
+    $('body').attr('style', 'height:' + wh + 'px;');
+    $('#imu').attr('style', 'height:' + wh + 'px;');
+}
+$(document).ready(function() {
+    set_body_height();
+    $(window).bind('resize', function() { set_body_height(); });
+});
+$('#imu').on({
+    'click': function() {
+         var src = ($(this).attr('src') === 'http://2.bp.blogspot.com/oAot4jfGsjkaB45zMkzSZzIrRxrHFypjCwWS7GI7s8wNR5DRSmKMj2rSPXhzzf6Zyq7YYEA2SiIGzoX2o8T0mHnXBh-go6YOMBF44bBoFOXVAHcegKsmbAtRpRQeiuGyuEmwNw=s0?title=002_1489600716.png')
+            ? 'http://2.bp.blogspot.com/mcyRnsepn42Ffc7L_6K5RKB__-JpUhc2zFWncPpeyfZroGXO5OjNJ_fS4czfa2q5waInGh6H7gDctHC1OLegKvdfrhadFotrcZPuRD2m60sK8xePmzPbJoAYxcBc4BuvEr68ZA=s0?title=000_1489600716.png'
+            : 'http://2.bp.blogspot.com/oAot4jfGsjkaB45zMkzSZzIrRxrHFypjCwWS7GI7s8wNR5DRSmKMj2rSPXhzzf6Zyq7YYEA2SiIGzoX2o8T0mHnXBh-go6YOMBF44bBoFOXVAHcegKsmbAtRpRQeiuGyuEmwNw=s0?title=002_1489600716.png';
+         $(this).attr('src', src);
+    }
+});
+$(document).keypress(function(e) {
+   var key = e.keyCode ? e.keyCode : e.which;
+
+   if (key == 33) {
+     alert('up');
+        $('#imu').attr('src', 'http://2.bp.blogspot.com/mcyRnsepn42Ffc7L_6K5RKB__-JpUhc2zFWncPpeyfZroGXO5OjNJ_fS4czfa2q5waInGh6H7gDctHC1OLegKvdfrhadFotrcZPuRD2m60sK8xePmzPbJoAYxcBc4BuvEr68ZA=s0?title=000_1489600716.png');
+   }else if (key == 34) {
+     alert('down');
+     $('#imu').attr('src', 'http://2.bp.blogspot.com/oAot4jfGsjkaB45zMkzSZzIrRxrHFypjCwWS7GI7s8wNR5DRSmKMj2rSPXhzzf6Zyq7YYEA2SiIGzoX2o8T0mHnXBh-go6YOMBF44bBoFOXVAHcegKsmbAtRpRQeiuGyuEmwNw=s0?title=002_1489600716.png');
+   }
+});
+</script>
+
+</body>
+</html>

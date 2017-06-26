@@ -1,0 +1,30 @@
+<!-- views/index.ejs -->
+<!doctype html>
+<html>
+<head>
+    <title>Node Authentication</title>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css"> <!-- load bootstrap css -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"> <!-- load fontawesome -->
+    <style>
+        body        { padding-top:80px; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="jumbotron text-center">
+        <h1><span class="fa fa-lock"></span> Node Authentication</h1>
+
+        <p>Login with:</p>
+        <a href="/auth/google" class="btn btn-danger"><span class="fa fa-google-plus"></span> Google</a>
+        <a href="http://minisharks.asuscomm.com:8095/batoto/searchResults" class="btn btn-danger"><span class="fa fa-google-plus"></span> MangaListPage</a>
+        <a href="http://minisharks.asuscomm.com:8095/batoto/favorites" class="btn btn-danger"><span class="fa fa-google-plus"></span> Favorites</a>
+    </div>
+    <form id="search" method="get" action="http://minisharks.asuscomm.com:8095/batoto/searchResults">
+        <input type="text" id="searchKeyword" name="searchKeyword">
+        <input type="submit" >
+    </form>
+
+</div>
+</body>
+</html>
