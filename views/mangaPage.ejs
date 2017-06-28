@@ -40,7 +40,7 @@
     </div>
     <div>
       <p> <span>☆⭐</span>
-    <a href="http://minisharks.asuscomm.com:8095/batoto/manga/<%= manga.mangaUrl %>?fav=true">Favourite?</a>
+    <a href="http://dokidoki.duckdns.org:8080/batoto/manga/<%= manga.mangaUrl %>?fav=true">Favourite?</a>
   </p>
     <table id="myTable">
       <tr>
@@ -72,8 +72,8 @@
       </tr>
       <% manga['chapters'].forEach(function(item, index) { %>
         <tr>
-          <td> <a href="http://minisharks.asuscomm.com:8095/batoto/manga/<%= manga.mangaUrl %>/<%=item.chapterUrl %>"> <%= item.chapterName %> </td>
-          <td> <a href="http://minisharks.asuscomm.com:8095/batoto/manga/<%= manga.mangaUrl %>/<%=item.chapterUrl %>?mod=true"> <%= item.chapterName %> </td>
+          <td> <a href="http://dokidoki.duckdns.org:8080/batoto/manga/<%= manga.mangaUrl %>/<%=item.chapterUrl %>"> <%= item.chapterName %> </td>
+          <td> <a href="http://dokidoki.duckdns.org:8080/batoto/manga/<%= manga.mangaUrl %>/<%=item.chapterUrl %>?mod=true"> <%= item.chapterName %> </td>
           <td> <a href="http://bato.to/reader#<%= item.chapterUrl %>"> http://bato.to/reader#<%= item.chapterUrl %></a> </td>
           <td> <%= item.date %> </td>
           <td> <%= item.sort %> </td>

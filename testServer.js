@@ -8,7 +8,6 @@ var flash    = require('connect-flash');
 var configDB = require('./config/database.js');
 
 //mongoose.connect(configDB.url);
-
 //require('./config/passport')(passport);
 
 app.configure(function() {

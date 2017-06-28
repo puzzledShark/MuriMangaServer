@@ -13,29 +13,29 @@
 <body>
 
 <header class="cd-auto-hide-header" style='background-color:#1aff66'>
-    <div class="logo"><a href="/"><h5><b>Muri Manga Reader</b></h5></a></div>
+  <div class="logo"><a href="/"><h5><b>Muri Manga Reader</b></h5></a></div>
 
-    <nav class="cd-primary-nav">
-        <a href="#cd-navigation" class="nav-trigger">
-            <span>
-                <em aria-hidden="true"></em>
-                Menu
-            </span>
-        </a> <!-- .nav-trigger -->
+  <nav class="cd-primary-nav">
+    <a href="#cd-navigation" class="nav-trigger">
+      <span>
+          <em aria-hidden="true"></em>
+          Menu
+      </span>
+    </a> <!-- .nav-trigger -->
 
-        <ul id="cd-navigation">
-            <li><a href="/">Home</a></li>
-            <li><a href="/batoto/searchResults">Search Manga</a></li>
-            <li><a href="./">Back to manga</a></li>
-            <% if(data.previousPage) { %>
-            <li> <a href='./<%= data.previousPage.split('#')[1] %>?mod=true'> Previous Chapter </a> </li>
-            <% } %>
-            <% if(data.nextPage) { %>
-            <li><a href='./<%= data.nextPage.split('#')[1] %>?mod=true'> Next Chapter </a> </li>
-            <% } %>
-            <li> Manga Page Zoom % <br/> <input id='slider' type="range" value="100"> </li>
-        </ul>
-    </nav> <!-- .cd-primary-nav -->
+    <ul id="cd-navigation">
+      <li><a href="/">Home</a></li>
+      <li><a href="/batoto/searchResults">Search Manga</a></li>
+      <li><a href="./">Back to manga</a></li>
+      <% if(data.previousPage) { %>
+      <li> <a href='./<%= data.previousPage.split('#')[1] %>?mod=true'> Previous Chapter </a> </li>
+      <% } %>
+      <% if(data.nextPage) { %>
+      <li> <a href='./<%= data.nextPage.split('#')[1] %>?mod=true'> Next Chapter </a> </li>
+      <% } %>
+      <li> Manga Page Zoom % <br/> <input id='slider' type="range" value="100"> </li>
+    </ul>
+  </nav> <!-- .cd-primary-nav -->
 </header> <!-- .cd-auto-hide-header -->
 
 <main class="cd-main-content">
@@ -59,23 +59,37 @@
 
 </div>
 
+<% 
+  var tmp = data.firstImage.split('img0000');
+  var page = 0;
+  for(var i = 1; i < (data.pagesCount + 1); i++) {
+    if(i < 10) { 
+%>
+    <img id="image<%= i %>" class='mangaPage center' style='width:100%' src='<%= tmp[0] %>img00000<%= i %>.png' onerror="imageFix(this);">
 
-<% var tmp = data.firstImage.split('img0000');
-var page = 0;
-for(var i = 1; i < (data.pagesCount + 1); i++) {
-if(i < 10) { %>
-  <img  class='mangaPage center' style='width:100%' src='<%= tmp[0] %>img00000<%= i %>.png' onerror="imageFix(this);">
-  <%
-}
-else {
-    %>
-  <img class='mangaPage center' style='width:100%' src='<%= tmp[0] %>img0000<%= i %>.png' onerror="imageFix(this);">
-  <%
-}
-  %>
-  <%
-}%>
+<%
+  }
+  else {
+%>
+    <img id="image<%= i %>" class='mangaPage center' style='width:100%' src='<%= tmp[0] %>img0000<%= i %>.png' onerror="imageFix(this);">
+<% } 
+} %>
 
+
+<div style="display: in-line">
+<% if(data.previousPage) { %>
+<button style="width:50%;height:300px" type="button">
+<p><a href="./<%= data.previousPage.split('#')[1] %>?mod=true"> Previous Chapter </a> </p>
+</button>
+<% } %>
+<% if(data.nextPage) { %>
+<button style="width:49%;height:300px" type="button">
+<p><a href="./<%= data.nextPage.split('#')[1] %>?mod=true"> Next Chapter </a> </p>
+</button>
+<% } %>
+</div>
+
+</main>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
 <script>
@@ -86,19 +100,24 @@ else {
       console.log(tmp);
       $('.mangaPage').attr('style', 'width:' + tmp + '%')
     });
-    var imageFix = function(element) {
-      console.log('Fixing:' + element.src);
-      var filetype = element.src.split('.')[3];
-      if(filetype == 'png') {
-        element.src = element.src.split('.png')[0] + '.jpg';
-      }
-      else if(filetype == 'jpg') {
-        element.src = element.src.split('.jpg')[0] + '.jpeg';
-      }
-      else if(filetype == 'jpeg') {
-        element.src = element.src.split('.jpeg')[0] + '.png';
-      }
+    function imageFix(image) {
+    if (!image.hasOwnProperty('retryCount')){
+      image.retryCount = 0;
+    }
 
+    if (image.retryCount < 100){
+      setTimeout(function (){
+          image.src += '?' + +new Date;
+          image.retryCount += 1;
+      }, 3000);
+    }
+  }
+    var imageFix2 = function(element) {
+      setTimeout(function(element) {
+        console.log("Trying to fix");
+        element.src = element.src;
+        element.onerror = imageFix(element);
+      }, 3000);
     }
 </script>
 <script src="/js/navbar.js"></script>

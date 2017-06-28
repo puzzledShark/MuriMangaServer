@@ -2,12 +2,12 @@ var kissManga = require('./kissMangaV2.js');
 var batoto = require('./batoto.js');
 var mangaDB = require('../config/mangaDB.js');
 var mangaUserDB = require('../config/mangaUserDB')
-
 var request = require('request')
-
 var Jimp = require("jimp");
-
 var Q = require('q');
+
+
+batoto.firstLogin();
 
 //batoto.login();
 //batoto.getChapters('http://bato.to/comic/_/rough-sketch-senpai-r20617');
@@ -18,10 +18,16 @@ module.exports = function(app, passport) {
     // HOME PAGE (with login links) ========
     // =====================================
     app.get('/', function(req, res) {
+      console.log("Running for / :" + req.originalUrl);
+      if(req.user) {
+        console.log("Logged In as: " + req.user);
+      }
+      else console.log("Not Logged in");
         res.render('index.ejs'); // load the index.ejs file
     });
     app.get('/batoto/manga/:mangaName', function(req,res) {
       console.log('User Accessed: ' + req.params.mangaName);
+      console.log("Running for batoto/manga/manganame :" + req.originalUrl);
       req.params.mangaName = encodeURIComponent(req.params.mangaName);
       req.params.mangaName = req.params.mangaName.toLowerCase();
       console.log(encodeURIComponent(req.params.mangaName));
@@ -92,15 +98,19 @@ module.exports = function(app, passport) {
       var filetype = originalData.firstImage.split('.')[3];
       var r = request(currentPage + currentPageNum + '.' + filetype)
       r.on('response', function(resp) {
-        //console.log("RESPONSE FOR " + currentPage + currentPageNum + '.' + filetype);
+        console.log("RESPONSE FOR " + currentPage + currentPageNum + '.' + filetype);
         //console.log(resp.statusCode);
-        if(resp.statusCode == '404') filetype = 'png'; 
+        if(resp.statusCode == '404') {
+          if(filetype == 'png') filetype = 'jpg';
+          else filetype == 'png'; 
+        }
       Jimp.read(currentPage + currentPageNum + '.' + filetype)
         .then(function(img) {
           img.autocrop(.002, false)
             .write("public/" + originalData.chapterName.replace(/[^a-zA-Z0-9]/g, "") + "/M" + zeroLen + currentPageNum + '.png');
         })
         .then(function() {
+          console.log(originalData.chapterName.replace(/[^a-zA-Z0-9]/g, "") + "/M" + zeroLen + currentPageNum + '.png Has been processed');
           //var pageUrl = "http//minisharks.asuscomm.com:8095/public/M" + zeroLen + currentPageNum + '.' + filetype;
           //newPages.push(pageUrl);
           //console.log("Successful, current newPages: " + newPages);
@@ -108,7 +118,7 @@ module.exports = function(app, passport) {
             jimpRender(originalData, ++currentPageNum, newPages, cb);
           }
           else {
-            originalData.firstImage = "http://minisharks.asuscomm.com:8095/public/" + originalData.chapterName.replace(/[^a-zA-Z0-9]/g, "") + "/Mimg000001.png";
+            originalData.firstImage = "http://dokidoki.duckdns.org:8080/public/" + originalData.chapterName.replace(/[^a-zA-Z0-9]/g, "") + "/Mimg000001.png";
             cb(originalData);
             console.log("Done");
           }
@@ -121,15 +131,28 @@ module.exports = function(app, passport) {
 
     app.get('/batoto/manga/:mangaName/:chapterUrl', function(req,res) {
       console.log('User Accessed: ' + req.params.mangaName + ' ' + req.params.chapterUrl);
+      console.log("Running for batoto/manga/manganame/chapterurl :" + req.originalUrl);
+
+      //Running Check
+
+
+
       batoto.getMangaChapterPages(req.params.chapterUrl, function(data) {
         if(req.query.mod == 'true') {
           console.log('mod activate');
-          console.log('Trying:' + "http://minisharks.asuscomm.com:8095/public/" + data.chapterName + "/Mimg000001.png")
-          console.log('Trying:' + "http://minisharks.asuscomm.com:8095/public/" + data.chapterName + "/Mimg000001.png")
+          console.log('Trying:' + "http://dokidoki.duckdns.org:8080/public/" + data.chapterName + "/Mimg000001.png")
+          console.log('Trying:' + "http://dokidoki.duckdns.org:8080/public/" + data.chapterName + "/Mimg000001.png")
           //data.firstModImage = "http://minisharks.asuscomm.com:8095/public/" + data.chapterName + "/Mimg000001.png";
-          
+          var firstImageOg = data.firstImage;
+          data.firstImage = "http://dokidoki.duckdns.org:8080/public/" + data.chapterName.replace(/[^a-zA-Z0-9]/g, "") + "/Mimg000001.png";
+          res.render('mangaChapterPageMod.ejs', {
+                data : data
+            });
+
+          data.firstImage = firstImageOg;
+
           var newPages = [];
-          var r = request("http://minisharks.asuscomm.com:8095/public/" + data.chapterName.replace(/[^a-zA-Z0-9]/g, "") + "/Mimg000001.png")
+          var r = request("http://dokidoki.duckdns.org:8080/public/" + data.chapterName.replace(/[^a-zA-Z0-9]/g, "") + "/Mimg000001.png")
           r.on('response', function(resp) {
             //console.log("RESPONSE FOR " + currentPage + currentPageNum + '.' + filetype);
             //console.log(resp.statusCode);
@@ -137,13 +160,15 @@ module.exports = function(app, passport) {
               jimpRender(data, 1, newPages, function(modData) {
                 console.log('Done');
                 console.log('tak' + data);
+                /*
                 res.render('mangaChapterPageMod.ejs', {
                 data : modData 
                 });
+                */
               })
             }
             else {
-              data.firstImage = "http://minisharks.asuscomm.com:8095/public/" + data.chapterName.replace(/[^a-zA-Z0-9]/g, "") + "/Mimg000001.png";
+              data.firstImage = "http://dokidoki.duckdns.org:8080/public/" + data.chapterName.replace(/[^a-zA-Z0-9]/g, "") + "/Mimg000001.png";
               res.render('mangaChapterPageMod', {
                 data: data
               });

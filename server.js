@@ -1,10 +1,10 @@
 // server.js
 
 // set up ======================================================================
-// get all the tools we need
+// get all the tools we need Bog Test2
 var express  = require('express');
 var app      = express();
-var port     = process.env.PORT || 8095;
+var port     = process.env.PORT || 8080;
 var mongoose = require('mongoose');
 var passport = require('passport');
 var flash    = require('connect-flash');

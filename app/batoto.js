@@ -1,7 +1,8 @@
+//Comment Test?
 var Nightmare = require('nightmare');
 var mangaDB = require('../config/mangaDB.js')
 var configAuth = require('../config/auth');
-var Q = require('Q')
+var Q = require('q')
 
 var setupNightmare = function() {
 	var nightmare = Nightmare({
@@ -18,7 +19,32 @@ var setupNightmare = function() {
 	return nightmare;
 }
 
-//
+var firstLogin = function() {
+	var nightmare = Nightmare({
+		show: false,
+		typeInterval: 20,
+		webPreferences: {
+			images: false,
+			partition: 'persist: batoto'
+		}
+	})
+	nightmare
+		.goto('https://bato.to/forums/index.php?app=core&module=global&section=login')
+		.wait('input#ips_username')
+		.type('input#ips_username', configAuth.batoto.login)
+		.type('input#ips_password', configAuth.batoto.pass)
+		.click('form#login > fieldset.submit:nth-child(5) > input.input_submit:nth-child(1)')
+		.wait('#user_link')
+		.evaluate(function () {
+			return document.querySelector('#user_link').innerText;
+		})
+		.end(function(result) {
+			console.log("firstLogin was successful: " + result);
+		})
+		.catch(function (error) {
+			console.error('firstLogin failed due to: ', error);
+	});
+}
 
 var login = function(callback) {
 	var nightmare = setupNightmare();
@@ -600,6 +626,7 @@ var getMangaChapterPages = function(mangaChapterUrl, cb) {
 }
 
 exports.login = login;
+exports.firstLogin = firstLogin;
 exports.getMangaInfoAndChapters = getMangaInfoAndChapters;
 exports.getMangaInfoAndChaptersLive = getMangaInfoAndChaptersLive;
 exports.getMangaDatabase = getMangaDatabase;
