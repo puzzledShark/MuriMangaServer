@@ -3,40 +3,76 @@
 <html>
 <head>
     <title>Test</title>
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css"> <!-- load bootstrap css -->
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"> <!-- load fontawesome -->
-    <link rel="stylesheet" type="text/css" href="/style/style.css">
+    <% include ./head.ejs %>
     <style>
         body        { padding-top:80px; }
+        img {
+          background: url('/public/loading.gif') no-repeat;
+        }
     </style>
+    <script src="/socket.io/socket.io.js"></script>
+<script>
+    $( document ).ready(function() {
+      console.log("Ready")
+      $('input[type=range]').on('input', function () {
+        var tmpVal = $("input[type=range]").val();
+        console.log(tmpVal);
+        $('.mangaPage').attr('style', 'width:' + tmpVal + '%')
+      });
+      $('#image<%= data.pagesCount%>').on('appear', function(event, $all_appeared_elements) {
+      // this element is now inside browser viewport
+        console.log('Appear Worked');
+      });
+
+      <% if(user) { %>
+
+      $('.mangaPage').attr('style', "width:<%= user.pageWidth %>%")
+      $('input[type=range]').val("<%= user.pageWidth %>")
+
+      $('#saveWidth').click(function () {
+        console.log('saveWidth Clicked');
+        var tmpVal = $("input[type=range]").val();
+        sockets.emit('widthChange', tmpVal, "<%=user.google.id %>");
+      })
+      <% } %>
+    });
+    //Super lazy fix since I don't really check for file extension when I find the images
+    var imageFix = function(element) {
+      console.log('Fixing:' + element.src);
+      var filetype = element.src.split('.')[3];
+      if(filetype == 'png') {
+        element.src = element.src.split('.png')[0] + '.jpg';
+      }
+      else if(filetype == 'jpg') {
+        element.src = element.src.split('.jpg')[0] + '.jpeg';
+      }
+      else if(filetype == 'jpeg') {
+        element.src = element.src.split('.jpeg')[0] + '.png';
+      }
+    }
+
+    <% if(user) { %>
+    var sockets = io.connect('http://dokidoki.duckdns.org:8080');
+
+    //If user is on the bottom of the page, he's probably finished reading the chapter
+    var marked = false;
+    $(window).scroll(function(){
+      if(!marked) {
+        if($(window).scrollTop() + 1000 > $(document).height() - $(window).height() ){
+          marked = true;
+          console.log("Sending chapter read");
+          console.log(window.location.href);
+          sockets.emit('chapterRead', window.location.href, "<%= user.google.id %>");
+        }
+      }
+    })
+    <% } %>
+</script>
+
+
 </head>
 <body>
-
-<header class="cd-auto-hide-header" style='background-color:#1aff66'>
-    <div class="logo"><a href="/"><h5><b></b></h5></a></div>
-
-    <nav class="cd-primary-nav">
-        <a href="#cd-navigation" class="nav-trigger">
-            <span>
-                <em aria-hidden="true"></em>
-                Menu
-            </span>
-        </a> <!-- .nav-trigger -->
-
-        <ul id="cd-navigation">
-            <li><a href="/">Home</a></li>
-            <li><a href="/batoto/searchResults">Search Manga</a></li>
-            <li><a href="./">Back to manga</a></li>
-            <% if(data.previousPage) { %>
-            <li> <a href='./<%= data.previousPage.split('#')[1] %>'> ⇦ </a> </li>
-            <% } %>
-            <% if(data.nextPage) { %>
-            <li><a href='./<%= data.nextPage.split('#')[1] %>'> ⇨  </a> </li>
-            <% } %>
-            <li> Manga Page Zoom % <br/> <input id='slider' type="range" value="100"> </li>
-        </ul>
-    </nav> <!-- .cd-primary-nav -->
-</header> <!-- .cd-auto-hide-header -->
+  <% include ./header.ejs %>
 
 <main class="cd-main-content">
 
@@ -45,7 +81,6 @@
     <div class="jumbotron text-center">
         <h1><span class="fa fa-lock"></span> <%= data.chapterName %> </h1>
     </div>
-  </p>
 
 <p> <%= data.firstImage %> </p>
 
@@ -64,6 +99,9 @@
   var tmp = data.firstImage.split('img0000');
   var page = 0;
   for(var i = 1; i < (data.pagesCount + 1); i++) {
+%>
+  <div style="background-color:black;text-align:right"><span style="color:white"> <b><%= i %> / <%= data.pagesCount %></b> </span></div>
+<%
     if(i < 10) { 
 %>
     <img id="image<%= i %>" class='mangaPage center' style='width:100%' src='<%= tmp[0] %>img00000<%= i %>.png' onerror="imageFix(this);">
@@ -80,62 +118,15 @@
 <div style="display: in-line">
 <% if(data.previousPage) { %>
 <button style="width:50%;height:300px" type="button">
-<p><a href="./<%= data.previousPage.split('#')[1] %>?mod=true"> Previous Chapter </a> </p>
+<p><a href="./<%= data.previousPage.split('#')[1] %>"> Previous Chapter </a> </p>
 </button>
 <% } %>
 <% if(data.nextPage) { %>
 <button style="width:49%;height:300px" type="button">
-<p><a href="./<%= data.nextPage.split('#')[1] %>?mod=true"> Next Chapter </a> </p>
+<p><a href="./<%= data.nextPage.split('#')[1] %>"> Next Chapter </a> </p>
 </button>
 <% } %>
 </div>
-
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-<script src="/js/jquery.appear.js"></script>
-<script>
-    $('input[type=range]').on('input', function () {
-      var tmp = $("input[type=range]").val();
-      console.log(tmp);
-      $('.mangaPage').attr('style', 'width:' + tmp + '%')
-    });
-
-    //Super lazy fix since I don't really check for file extension when I find the images
-    var imageFix = function(element) {
-      console.log('Fixing:' + element.src);
-      var filetype = element.src.split('.')[3];
-      if(filetype == 'png') {
-        element.src = element.src.split('.png')[0] + '.jpg';
-      }
-      else if(filetype == 'jpg') {
-        element.src = element.src.split('.jpg')[0] + '.jpeg';
-      }
-      else if(filetype == 'jpeg') {
-        element.src = element.src.split('.jpeg')[0] + '.png';
-      }
-    }
-
-
-    //These 2 functions govern an action that takes place once a user reads all the way to the bottom
-    $(window).on('scroll', function(element) {
-      if(isInViewport(document.getElementById('image<%= data.pagesCount %>'))) {
-        console.log('works');
-      }
-    });
-
-    function isInViewport(element) {
-    var rect = element.getBoundingClientRect();
-    //console.log(rect)
-    var html = document.documentElement;
-    return (
-      rect.top >= 0 &&
-      rect.left >= 0 &&
-      rect.bottom <= (window.innerHeight || html.clientHeight) &&
-      rect.right <= (window.innerWidth || html.clientWidth)
-    );
-}
-</script>
-<script src="/js/navbar.js"></script>
-
+</main>
 </body>
 </html>

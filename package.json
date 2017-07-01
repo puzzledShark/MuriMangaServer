@@ -19,7 +19,8 @@
         "cheerio" : "1.0.0-rc.1",
         "nightmare": "2.10.0",
         "jimp": "0.2.28",
-        "q": "latest"
+        "q": "latest",
+        "socket.io": "~2.0.1"
     },
     "author": "Kenny Nguyen <kenimorri@gmail.com>",
     "description": "Muri Web Reader prototype"

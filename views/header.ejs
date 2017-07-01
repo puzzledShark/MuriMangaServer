@@ -1,0 +1,22 @@
+<header class="cd-auto-hide-header">
+    <nav>
+            <a href="/">Home</a>
+            <a href="/batoto/searchResults">Search Manga</a>
+            <% if((typeof manga == 'undefined')) { %>
+                <a href="./">Back to manga</a>
+                <% if(data.previousPage) { %>
+                     <a href='./<%= data.previousPage.split('#')[1] %>'> ⇦ </a> 
+                <% } %>
+                <% if(data.nextPage) { %>
+                    <a href='./<%= data.nextPage.split('#')[1] %>'> ⇨  </a> 
+                <% } %>
+                 Manga Page Zoom % <br/> <input id='slider' type="range" value="100"> 
+            <% } %>
+            <% if(user) { console.log('user?o.0:' + user) %>
+                <button id="saveWidth" type="button">Save</button>
+                 Logged in as: <%= user.google.name %> 
+            <% } else { %>
+                 <a href="/auth/google" class="btn btn-danger"><span class="fa fa-google-plus"></span> Google</a>
+            <% } %>
+    </nav>
+</header>

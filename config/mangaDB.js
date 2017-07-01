@@ -108,6 +108,20 @@ var getMangas = function(keyword) {
   });
 }
 
+var getFavouriteMangas = function(favourites) {
+  console.log('Trying to find favourites');
+  console.log(favourites);
+  var favArr = [];
+  favourites.forEach(function(item) {
+    favArr.push(item.mangaUrl);
+  })
+  return Q(Manga.find( {
+    mangaUrl: {
+      $in: favArr
+    }
+  }));
+}
+
 
 
 exports.newMangaEntry = newMangaEntry;
@@ -115,3 +129,4 @@ exports.getAllManga = getAllManga;
 exports.getMangas = getMangas;
 exports.getManga = getManga;
 exports.updateMangaEntry = updateMangaEntry;
+exports.getFavouriteMangas = getFavouriteMangas;

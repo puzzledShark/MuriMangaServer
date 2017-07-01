@@ -13,19 +13,29 @@
 <div class="container">
 
     <div class="jumbotron text-center">
-        <h1><span class="fa fa-lock"></span> Database Test</h1>
-    <table id="myTable">
+    <h1><span class="fa fa-lock"></span> Tmp Favourites Page</h1>
+  </div>
+</div>
+
+    <table id="myTable2" style="width:100%">
       <tr>
-        <th> Manga Links </th>
+        <th> Image </th>
+        <th> Manga Name </th>
+        <th> Manga Url </th>
+        <th> Author </th>
+        <th> Last Updated </th>
       </tr>
-        <% mangas.forEach(function(item, index) { %>
+        <% fullMangas.forEach(function(item, index) { %>
           <tr>
-            <td> <a href="http://dokidoki.duckdns.org:8080/batoto/manga/<%= item.mangaUrl %>"> <%= item.mangaUrl %> </td>
+            <td> <img src="<%= item.mangaImageUrl %>" style="height:200px;max-width:200px"> </td>
+            <td> <a href="./manga/<%= item.mangaUrl %>"> <%= item.mangaName %> </a> </td>
+            <td> <a href="http://bato.to/comic/_/comics/<%= item.mangaUrl %>"> http://bato.to/comic/_/comics/<%= item.mangaUrl %></a> </td>
+            <td> <%= item.author %> </td>
+            <td> <%= item.lastUpdated %> </td>
           </tr>
         <% }); %>
     </table>
 <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 <script src="/js/main.js"></script>
-</div>
 </body>
 </html>

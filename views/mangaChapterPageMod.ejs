@@ -2,13 +2,65 @@
 <!doctype html>
 <html>
 <head>
-    <title>Test</title>
+    <title> <%= data.chapterName %> </title>
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css"> <!-- load bootstrap css -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"> <!-- load fontawesome -->
     <link rel="stylesheet" type="text/css" href="/style/style.css">
     <style>
         body        { padding-top:80px; }
+        img {
+          opacity: 1;
+          transition: opacity 0.01s;
+        }
+
+        img[data-src] {
+          opacity: 0;
+        }
     </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+<script>
+    $( document ).ready(function() {
+      $('input[type=range]').on('input', function () {
+        var tmp = $("input[type=range]").val();
+        console.log(tmp);
+        $('.mangaPage').attr('style', 'width:' + tmp + '%')
+      });
+      $('.mangaPage').on( 'load', function(){
+        console.log('loaded' + $(this).attr('src'))
+        //$(this).show();
+        $(this).prev().hide();
+      })
+    })
+  function imageFix(image) {
+    if (!image.hasOwnProperty('retryCount')){
+      image.retryCount = 0;
+    }
+
+    if (image.retryCount < 100){
+      setTimeout(function (){
+          image.src += '?' + +new Date;
+          image.retryCount += 1;
+      }, 3000);
+    }
+  }
+  <% if(user) { %>
+    //If user is on the bottom of the page, he's probably finished reading the chapter
+    var marked = false;
+    $(window).scroll(function(){
+      if(!marked) {
+        if($(window).scrollTop() + 1000 > $(document).height() - $(window).height() ){
+          marked = true;
+          console.log("Sending chapter read");
+          console.log(window.location.href);
+          var sockets = io.connect('http://dokidoki.duckdns.org:8080');
+          sockets.emit('chapterRead', window.location.href, "<%= user.google.id %>");
+        }
+      }
+    })
+    <% } %>
+</script>
+<script src="/js/navbar.js"></script>
 </head>
 <body>
 
@@ -46,35 +98,33 @@
         <h1><span class="fa fa-lock"></span>MODDED <%= data.chapterName %> </h1>
     </div>
   </p>
-
+<div style="width: 80%;
+    word-wrap: break-word;">
 <p> <%= data.firstImage %> </p>
 
 <p> <%= data.pagesCount %> </p>
-<% if(data.previousPage) { %>
-<p> <a href='./<%= data.previousPage.split('#')[1] %>'> Previous Chapter </a> </p>
-<% } %>
-<% if(data.nextPage) { %>
-<p><a href='./<%= data.nextPage.split('#')[1] %>'> Next Chapter </a> </p>
-<% } %>
-
+</div>
 </div>
 
 <% 
   var tmp = data.firstImage.split('img0000');
   var page = 0;
   for(var i = 1; i < (data.pagesCount + 1); i++) {
+%>
+  <div style="background-color:black;text-align:right"><span style="color:white"> <b><%= i %> / <%= data.pagesCount %>  &nbsp; </b> </span></div>
+  <img id="loader" class='center' style="width:100%" src='/public/loading.gif'>
+<%
     if(i < 10) { 
 %>
-    <img id="image<%= i %>" class='mangaPage center' style='width:100%' src='<%= tmp[0] %>img00000<%= i %>.png' onerror="imageFix(this);">
+    <img id="image<%= i %>" class='mangaPage center' style='width:100%' data-src='<%= tmp[0] %>img00000<%= i %>.png' onerror="imageFix(this);">
 
 <%
   }
   else {
 %>
-    <img id="image<%= i %>" class='mangaPage center' style='width:100%' src='<%= tmp[0] %>img0000<%= i %>.png' onerror="imageFix(this);">
-<% } 
-} %>
-
+    <img id="image<%= i %>" class='mangaPage center' style='width:100%' data-src='<%= tmp[0] %>img0000<%= i %>.png' onerror="imageFix(this);">
+<% } %> 
+<% } %>
 
 <div style="display: in-line">
 <% if(data.previousPage) { %>
@@ -90,39 +140,14 @@
 </div>
 
 </main>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
 <script>
-    if( !window.jQuery ) document.write('<script src="js/jquery-3.0.0.min.js"><\/script>');
-    $('input[type=range]').on('input', function () {
-      //$(this).trigger('change');
-      var tmp = $("input[type=range]").val();
-      console.log(tmp);
-      $('.mangaPage').attr('style', 'width:' + tmp + '%')
-    });
-    function imageFix(image) {
-    if (!image.hasOwnProperty('retryCount')){
-      image.retryCount = 0;
-    }
-
-    if (image.retryCount < 100){
-      setTimeout(function (){
-          image.src += '?' + +new Date;
-          image.retryCount += 1;
-      }, 3000);
-    }
-  }
-    var imageFix2 = function(element) {
-      setTimeout(function(element) {
-        console.log("Trying to fix");
-        element.src = element.src;
-        element.onerror = imageFix(element);
-      }, 3000);
-    }
+[].forEach.call(document.querySelectorAll('img[data-src]'),    function(img) {
+  img.setAttribute('src', img.getAttribute('data-src'));
+  img.onload = function() {
+    img.removeAttribute('data-src');
+  };
+});
 </script>
-<script src="/js/navbar.js"></script>
-
-
 
 
 </body>
