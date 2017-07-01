@@ -3,45 +3,25 @@
 <html>
 <head>
     <title><%= manga.mangaName %></title>
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css"> <!-- load bootstrap css -->
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"> <!-- load fontawesome -->
-    <link rel="stylesheet" type="text/css" href="/style/style.css">
+    <% include ./head.ejs %>
     <style>
         body        { padding-top:80px; }
     </style>
 </head>
 <body>
-
-<header class="cd-auto-hide-header" style='background-color:#ff5050'>
-    <div class="logo"><a href="/"><h5><b>Muri Manga Reader</b></h5></a></div>
-
-    <nav class="cd-primary-nav">
-        <a href="#cd-navigation" class="nav-trigger">
-            <span>
-                <em aria-hidden="true"></em>
-                Menu
-            </span>
-        </a> <!-- .nav-trigger -->
-
-        <ul id="cd-navigation">
-            <li><a href="/">Home</a></li>
-            <li><a href="/batoto/searchResults">Search Manga</a></li>
-        </ul>
-    </nav> <!-- .cd-primary-nav -->
-</header> <!-- .cd-auto-hide-header -->
+  <% include ./header.ejs %>
 
 <main class="cd-main-content">
-
-
 <div class="container">
-
     <div class="jumbotron text-center">
         <h1><img src="<%= manga.mangaImageUrl %>" style="height:200px"><%= manga.mangaName %></h1>
     </div>
     <div>
+      <% if(user) { %> 
       <p> <span>☆⭐</span>
-    <a href="http://dokidoki.duckdns.org:8080/batoto/manga/<%= manga.mangaUrl %>?fav=true">Favourite?</a>
-  </p>
+        <a href="http://dokidoki.duckdns.org:8080/batoto/manga/<%= manga.mangaUrl %>?fav=true">Favourite?</a>
+      </p>
+      <% } %>
     <table id="myTable">
       <tr>
         <th> Manga Name </th>
@@ -71,7 +51,15 @@
         <th>Sort</th>
       </tr>
       <% manga['chapters'].forEach(function(item, index) { %>
-        <tr>
+        <% if(!(typeof read === 'undefined')) { %>
+        <% if ( (read.indexOf(item.chapterUrl)) > -1 ) {%>
+            <tr style="background-color: lightblue;">
+              <% } else { %>
+            <tr>
+          <% } %>
+        <% } else { %>
+          <tr>
+            <% } %>
           <td> <a href="http://dokidoki.duckdns.org:8080/batoto/manga/<%= manga.mangaUrl %>/<%=item.chapterUrl %>"> <%= item.chapterName %> </td>
           <td> <a href="http://dokidoki.duckdns.org:8080/batoto/manga/<%= manga.mangaUrl %>/<%=item.chapterUrl %>?mod=true"> <%= item.chapterName %> </td>
           <td> <a href="http://bato.to/reader#<%= item.chapterUrl %>"> http://bato.to/reader#<%= item.chapterUrl %></a> </td>
@@ -80,11 +68,7 @@
         </tr>
       <% }); %>
     </table>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-<script>
-    if( !window.jQuery ) document.write('<script src="js/jquery-3.0.0.min.js"><\/script>');
-</script>
-<script src="/js/navbar.js"></script>
 </div>
+</main>
 </body>
 </html>

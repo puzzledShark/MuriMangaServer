@@ -10,7 +10,8 @@ var userSchema = mongoose.Schema({
         token        : String,
         email        : String,
         name         : String
-    }
+    },
+    pageWidth : Number
 });
 
 // methods ======================

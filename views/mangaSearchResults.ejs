@@ -54,6 +54,7 @@
       </tr>
         <% manga.forEach(function(item, index) { %>
           <tr>
+            <td> <img src="<%= item.mangaImageUrl %>" style="height:200px"> </td>
             <td> <%= item.mangaName %> </td>
             <td> <a href="./manga/<%= item.mangaUrl %>"> <%= item.mangaUrl %> </a> </td>
             <td> <a href="http://bato.to/comic/_/comics/<%= item.mangaUrl %>"> http://bato.to/comic/_/comics/<%= item.mangaUrl %></a> </td>

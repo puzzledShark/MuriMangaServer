@@ -3,10 +3,37 @@ var MangaUser           = require('../app/models/mangaUser');
 var Q = require('q');
 
 var getUserDB = function(userID) {
-  return Q(MangaUser.find({ "userID" : userID }).exec())
+  return Q(MangaUser.findOne({ "userID" : userID }).exec())
   .then(function(mangas) {
     return mangas;
   });
+};
+
+var createMangaUserDB = function(userID) {
+  console.log('mangaDB updateMangaEntry');
+  return Q(MangaUser.findOne({'userID' : userID}).exec())
+  .then(function(manga) {
+    if(manga) {
+      return false;
+    }
+    else {
+      console.log("USER did not own a DATABASE in MangaUserDB, thus making it");
+      var newMangaUser = new MangaUser();
+      newMangaUser.userID = userID;
+      newMangaUser.save(function(err) {
+        if(err)
+          throw err;
+      })
+      return true;
+    }
+  })
+  .then(function(manga) {
+    if(manga) console.log("Database created");
+
+  })
+  .catch(function(err) {
+    console.log("Ran into: " + err);
+  })
 };
 
 var addNewManga = function(newData) {
@@ -59,5 +86,58 @@ var addNewManga = function(newData) {
   })
 };
 
+var updateMangaChaptersRead = function( mangaURL, chapterURL, userID) {
+  console.log('Trying to update Mangas Read with:');
+  MangaUser.findOne({'userID' : userID}).exec()
+  .then(function(userDB) {
+    userDB.mangas.find(function(value,index) {
+      if(value.mangaUrl == mangaURL) {
+        var traversal =  "mangas." + index + ".chapters";
+        var val1 = { userID : userID};
+        var val2 = {};
+        val2[traversal] = chapterURL;
+        console.log(val2);
+        var val3 = {};
+        val3['$addToSet'] = val2;
+        console.log(val3);
+        
+        MangaUser.updateOne(val1, val3, function(err, res) {
+          if(err) throw err;
+          console.log("1 Record updated");
+        })
+      }
+    })
+  })
+  .catch(function(err) {
+    console.log("Ran into: " + err);
+  })
+}
+
+var getUserMangaChaptersRead = function( mangaURL, userID) {
+  return Q(MangaUser.findOne({'userID' : userID}).exec())
+  .then(function(userDB) {
+    return userDB.mangas.find(function(value, index) {
+      if(value.mangaUrl == mangaURL) {
+        var arr = [];
+        value.chapters.forEach(function(item) {
+          arr.push(item);
+        })
+        return arr;
+      }
+    })
+  })
+}
+
+var setWidth = function(width, id) {
+  return  MangaUser.updateOne( { 'userID' : id} , { 'pageWidth' : width }, function(err, res) {
+        if(err) throw err;
+        console.log("Updated Width");
+    })
+}
+
 exports.getUserDB = getUserDB;
 exports.addNewManga = addNewManga;
+exports.updateMangaChaptersRead = updateMangaChaptersRead;
+exports.getUserMangaChaptersRead = getUserMangaChaptersRead;
+exports.createMangaUserDB = createMangaUserDB;
+exports.setWidth = setWidth;

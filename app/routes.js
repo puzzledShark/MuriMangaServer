@@ -18,7 +18,7 @@ module.exports = function(app, passport) {
     // HOME PAGE (with login links) ========
     // =====================================
     app.get('/', function(req, res) {
-      console.log("Running for / :" + req.originalUrl);
+      //console.log("Running for / :" + req.originalUrl);
       if(req.user) {
         console.log("Logged In as: " + req.user);
       }
@@ -27,17 +27,19 @@ module.exports = function(app, passport) {
     });
     app.get('/batoto/manga/:mangaName', function(req,res) {
       console.log('User Accessed: ' + req.params.mangaName);
-      console.log("Running for batoto/manga/manganame :" + req.originalUrl);
+      //console.log("Running for batoto/manga/manganame :" + req.originalUrl);
       req.params.mangaName = encodeURIComponent(req.params.mangaName);
       req.params.mangaName = req.params.mangaName.toLowerCase();
       console.log(encodeURIComponent(req.params.mangaName));
 
       if(req.query.fav == 'true') {
+        console.log(">>>>>>>>>>>>>>>>>>>>> USER TRYING TO FAVOURITE")
         console.log("Current UserID: " + req.user.google.id);
         console.log("Trying to add manga: " + req.params.mangaName)
         var tmp = { userID : req.user.google.id, mangaName : req.params.mangaName}
         mangaUserDB.addNewManga(tmp)
         .then(function(manga) {
+          console.log(manga);
           if(manga === null) throw new Error('No manga was found');
           res.redirect('/batoto/manga/' + req.params.mangaName);
         })
@@ -50,6 +52,7 @@ module.exports = function(app, passport) {
         })
       }
       else {
+
         console.log('Looking for manga');
         mangaDB.getManga(req.params.mangaName)
         .then(function(manga) {
@@ -58,15 +61,43 @@ module.exports = function(app, passport) {
         })
         .then(function(manga) {
           if(manga.genres.length > 0) {
-            console.log('Sending this Manga to client: ' + manga);
-            res.render('mangaPage.ejs', {
-              manga : manga,
-              user : req.user
-            });
+            console.log("Sending Manga to client");
+            //console.log('Sending this Manga to client: ' + manga);
+            if(req.user) {
+              console.log('Logged in');
+             mangaUserDB.getUserMangaChaptersRead(req.params.mangaName, req.user.google.id)
+              .then(function(userMangaChapterDB) {
+                if(userMangaChapterDB) {
+                  console.log("User has chapters to fill" + userMangaChapterDB.chapters);
+                  res.render('mangaPage.ejs', {
+                    manga : manga,
+                    user : req.user,
+                    read : userMangaChapterDB.chapters
+                  });
+                }
+                else {
+                  res.render('mangaPage.ejs', {
+                    manga : manga,
+                    user : req.user
+                  });
+                }
+              })
+              .catch(function(err) {
+                console.error('Something went wrong: ' + err);
+                res.send('404 Error URL does not exist', 404);
+              })
+            }
+            else {
+              res.render('mangaPage.ejs', {
+                    manga : manga,
+                    user : req.user
+                  });
+            }
           }
           else {
             batoto.getMangaInfoAndChaptersLive('http://bato.to/comic/_/' + req.params.mangaName, function(manga) {
-              console.log("Send this manga to client LIVE: " + manga);
+              console.log("Sending Manga to client LIVE");
+              //console.log("Send this manga to client LIVE: " + manga);
               res.render('mangaPage.ejs', {
                 manga : manga,
                 user : req.user
@@ -79,11 +110,19 @@ module.exports = function(app, passport) {
           res.send('404 Error URL does not exist', 404);
         })
         .done(function(manga) {
+          if(req.user) {
+            console.log(req.user);
+          }
           console.log('Finished sending request');
         })
-        //batoto.getChapters('http://bato.to/comic/_/' + req.params.mangaName);
       }
     });
+    
+    var personalize = function(mangaURL, userID) {
+     
+      }
+
+  
 
     var jimpRender = function(originalData, currentPageNum, newPages, cb) {
       //console.log('JIMP');
@@ -102,15 +141,15 @@ module.exports = function(app, passport) {
         //console.log(resp.statusCode);
         if(resp.statusCode == '404') {
           if(filetype == 'png') filetype = 'jpg';
-          else filetype == 'png'; 
+          else filetype = 'png'; 
         }
       Jimp.read(currentPage + currentPageNum + '.' + filetype)
         .then(function(img) {
           img.autocrop(.002, false)
-            .write("public/" + originalData.chapterName.replace(/[^a-zA-Z0-9]/g, "") + "/M" + zeroLen + currentPageNum + '.png');
+            .write("public/" + originalData.mangaName.replace(/[^a-zA-Z0-9]/g, "") + "/" + originalData.chapterName.replace(/[^a-zA-Z0-9]/g, "") + "/M" + zeroLen + currentPageNum + '.png');
         })
         .then(function() {
-          console.log(originalData.chapterName.replace(/[^a-zA-Z0-9]/g, "") + "/M" + zeroLen + currentPageNum + '.png Has been processed');
+          console.log(originalData.mangaName.replace(/[^a-zA-Z0-9]/g, "") + "/M" + zeroLen + currentPageNum + '.png Has been processed');
           //var pageUrl = "http//minisharks.asuscomm.com:8095/public/M" + zeroLen + currentPageNum + '.' + filetype;
           //newPages.push(pageUrl);
           //console.log("Successful, current newPages: " + newPages);
@@ -118,7 +157,7 @@ module.exports = function(app, passport) {
             jimpRender(originalData, ++currentPageNum, newPages, cb);
           }
           else {
-            originalData.firstImage = "http://dokidoki.duckdns.org:8080/public/" + originalData.chapterName.replace(/[^a-zA-Z0-9]/g, "") + "/Mimg000001.png";
+            originalData.firstImage = "http://dokidoki.duckdns.org:8080/public/" + originalData.mangaName.replace(/[^a-zA-Z0-9]/g, "") + "/" + originalData.chapterName.replace(/[^a-zA-Z0-9]/g, "") +"/Mimg000001.png";
             cb(originalData);
             console.log("Done");
           }
@@ -131,7 +170,7 @@ module.exports = function(app, passport) {
 
     app.get('/batoto/manga/:mangaName/:chapterUrl', function(req,res) {
       console.log('User Accessed: ' + req.params.mangaName + ' ' + req.params.chapterUrl);
-      console.log("Running for batoto/manga/manganame/chapterurl :" + req.originalUrl);
+      //console.log("Running for batoto/manga/manganame/chapterurl :" + req.originalUrl);
 
       //Running Check
 
@@ -139,20 +178,22 @@ module.exports = function(app, passport) {
 
       batoto.getMangaChapterPages(req.params.chapterUrl, function(data) {
         if(req.query.mod == 'true') {
+          data.mangaName = req.params.mangaName;
           console.log('mod activate');
           console.log('Trying:' + "http://dokidoki.duckdns.org:8080/public/" + data.chapterName + "/Mimg000001.png")
           console.log('Trying:' + "http://dokidoki.duckdns.org:8080/public/" + data.chapterName + "/Mimg000001.png")
           //data.firstModImage = "http://minisharks.asuscomm.com:8095/public/" + data.chapterName + "/Mimg000001.png";
           var firstImageOg = data.firstImage;
-          data.firstImage = "http://dokidoki.duckdns.org:8080/public/" + data.chapterName.replace(/[^a-zA-Z0-9]/g, "") + "/Mimg000001.png";
+          data.firstImage = "http://dokidoki.duckdns.org:8080/public/" + data.mangaName.replace(/[^a-zA-Z0-9]/g, "") + "/" + data.chapterName.replace(/[^a-zA-Z0-9]/g, "") + "/Mimg000001.png";
           res.render('mangaChapterPageMod.ejs', {
-                data : data
+                data : data,
+                user : req.user
             });
 
           data.firstImage = firstImageOg;
 
           var newPages = [];
-          var r = request("http://dokidoki.duckdns.org:8080/public/" + data.chapterName.replace(/[^a-zA-Z0-9]/g, "") + "/Mimg000001.png")
+          var r = request("http://dokidoki.duckdns.org:8080/public/" + data.mangaName.replace(/[^a-zA-Z0-9]/g, "") + "/" + data.chapterName.replace(/[^a-zA-Z0-9]/g, "") + "/Mimg000001.png")
           r.on('response', function(resp) {
             //console.log("RESPONSE FOR " + currentPage + currentPageNum + '.' + filetype);
             //console.log(resp.statusCode);
@@ -168,16 +209,18 @@ module.exports = function(app, passport) {
               })
             }
             else {
-              data.firstImage = "http://dokidoki.duckdns.org:8080/public/" + data.chapterName.replace(/[^a-zA-Z0-9]/g, "") + "/Mimg000001.png";
+              data.firstImage = "http://dokidoki.duckdns.org:8080/public/" + data.mangaName.replace(/[^a-zA-Z0-9]/g, "") + "/" + data.chapterName.replace(/[^a-zA-Z0-9]/g, "") + "/Mimg000001.png";
               res.render('mangaChapterPageMod', {
-                data: data
+                data: data,
+                user : req.user
               });
             }
           });
         }
         else {
           res.render('mangaChapterPage.ejs', {
-            data : data
+            data : data,
+            user : req.user
           });
         }
       });
@@ -200,14 +243,17 @@ module.exports = function(app, passport) {
 
     app.get('/batoto/favorites', isLoggedIn, function(req,res) {
       mangaUserDB.getUserDB(req.user.google.id)
-      .then(function(mangas) {
-        console.log(mangas);
-        mangas[0].mangas.forEach(function(item) {
-          console.log(item);
+      .then(function(userMangaDB) {
+        mangaDB.getFavouriteMangas(userMangaDB.mangas)
+        .then( function(favourites) {
+          //console.log('Returned favourites:' + favourites);
+          //console.log('Does userMangaChapterDB' + userMangaDB)
+          res.render('favorites.ejs', {
+            mangas : userMangaDB.mangas,
+            fullMangas : favourites
+          });
         })
-        res.render('favorites.ejs', {
-          mangas : mangas[0].mangas
-        });
+        
       });
     })
 
@@ -327,7 +373,13 @@ module.exports = function(app, passport) {
     // we will want this protected so you have to be logged in to visit
     // we will use route middleware to verify this (the isLoggedIn function)
     app.get('/profile', isLoggedIn, function(req, res) {
-        res.redirect('/');
+      mangaUserDB.createMangaUserDB(req.user.google.id);
+      console.log('Redirecting from /profile');
+        if(req.header('Referer')) {
+          console.log("Referer was: " + req.header('Referer'))
+          res.redirect(req.header('Referer'));
+        }
+        else res.redirect('/');
         /*res.render('profile.ejs', {
             user : req.user // get the user out of session and pass to template
         });*/
@@ -365,5 +417,9 @@ function isLoggedIn(req, res, next) {
         return next();
 
     // if they aren't redirect them to the home page
-    res.redirect('/');
+    if(req.header('Referer')) {
+          console.log("Referer was: " + req.header('Referer'))
+          res.redirect(req.header('Referer'));
+    }
+    else res.redirect('/');
 }
