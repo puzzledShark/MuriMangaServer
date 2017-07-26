@@ -2,6 +2,7 @@
     <nav>
             <a href="/">Home</a>
             <a href="/batoto/searchResults">Search Manga</a>
+            <a href="/batoto/favoritesRecentlyUpdated">Fav Recently updated</a>
             <% if((typeof manga == 'undefined')) { %>
                 <a href="./">Back to manga</a>
                 <% if(data.previousPage) { %>
@@ -12,7 +13,7 @@
                 <% } %>
                  Manga Page Zoom % <br/> <input id='slider' type="range" value="100"> 
             <% } %>
-            <% if(user) { console.log('user?o.0:' + user) %>
+            <% if(!(typeof user === 'undefined')) { %>
                 <button id="saveWidth" type="button">Save</button>
                  Logged in as: <%= user.google.name %> 
             <% } else { %>

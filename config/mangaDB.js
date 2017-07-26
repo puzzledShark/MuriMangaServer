@@ -1,11 +1,13 @@
 // load up the user model
-var Manga           = require('../app/models/manga');
+var Manga  = require('../app/models/manga');
 var Q = require('q');
+var debug = require('debug')('Muri:MangaDB')  
 
 
 var newMangaEntry = function(newManga) {
-  console.log('Trying to insert ' + newManga.length + ' mangas');
-  Manga.insertMany(newManga, function(error, docs) {});
+  debug('newMangaEntry');
+  //console.log('Trying to insert ' + newManga.length + ' mangas');
+  Manga.insertMany(newManga,{ ordered: false}, function(error, docs) {});
 
   /*
   Manga.findOne({ 'mangaUrl' : newManga.mangaUrl}, function(err, manga) {
@@ -33,7 +35,17 @@ var newMangaEntry = function(newManga) {
   */
 };
 
+var insertOneManga = function(newManga) {
+  debug('insertOneManga');
+  console.log('insertOneManga')
+  Manga.insertOne( {'mangaUrl' : newManga.mangaUrl,
+    'mangaName' : newManga.mangaName,
+    'author' : newManga.author })
+
+}
+
 var getManga = function(batotoEndingUrl) {
+  debug('getManga');
   console.log('Comparing:' + batotoEndingUrl + ')');
   //var fullBatotoUrl = "http://bato.to/comic/_/" + batotoEndingUrl;
   return Q(Manga.findOne({'mangaUrl': batotoEndingUrl}).exec())
@@ -46,6 +58,7 @@ var getManga = function(batotoEndingUrl) {
 }
 
 var getAllManga = function() {
+  debug('getAllManga');
   console.log('getAllManga');
   var arr = [];
   Manga.find({},function(err, mangas) {
@@ -59,31 +72,33 @@ var getAllManga = function() {
 }
 
 var updateMangaEntry = function(newData) {
-  console.log('mangaDB updateMangaEntry');
+  debug('updateMangaEntry');
+  //console.log('mangaDB updateMangaEntry');
   return Q(Manga.findOne({'mangaUrl' : newData.mangaUrl}).exec())
   .then(function(manga) {
-    console.log('Trying to update: ' + manga);
-    console.log('genres?' + newData.mangaInfo.genre);
+    //console.log('Trying to update Manga Entry of: ' + manga.mangaName);
+    //console.log('genres?' + newData.mangaInfo.genre);
     manga['genres'] = newData.mangaInfo.genre;
     manga['mangaDesc'] = newData.mangaInfo.desc;
     manga['artist'] = newData.mangaInfo.artist;
     manga['mangaImageUrl'] = newData.mangaInfo.mangaImageUrl;
+    manga['lastUpdated'] = newData.lastUpdated;
+    manga['lastChapter'] = newData.lastChapter;
+    manga['lastChapterUrl'] = newData.lastChapterUrl;
     var i = 0;
     var chapterList = [{}];
     while(newData[i]) {
       //console.log(newData[i]);
       chapterList.push(newData[i++]);
-      //manga['chapters'].push(newData[i++]);
     }
     chapterList.shift();
+    if(manga['chapters'].length < chapterList.length) {
+      console.log(manga['mangaName'] + " Appears to have new chapters");
+    }
     manga['chapters'] = chapterList;
     return manga;
-    //console.log("AFTER" + manga);
   })
   .then(function(manga) {
-    console.log("Attempting to override");
-    //Manga.replaceOne( {"_id" : manga._id}, manga);
-
     manga.save(function(err) {
         if (err)
             throw err;
@@ -96,21 +111,33 @@ var updateMangaEntry = function(newData) {
 }
 
 var getMangas = function() {
+  debug('getMangas');
   return Q(Manga.find({}).exec())
   .then(function(mangas) {
     return mangas
   });
 }
+
 var getMangas = function(keyword) {
+  debug('newMangaEntry:%s', keyword);
   return Q(Manga.find({ "mangaName" : { "$regex" : keyword , "$options" : "i"}}).exec())
   .then(function(mangas) {
     return mangas
   });
 }
 
+
+var getRecentlyUpdated = function() {
+  debug('getRecentlyUpdated');
+  return Q(Manga.find().sort({"lastUpdated": -1}).limit(100).exec())
+  .then(function(mangas) {
+    return mangas;
+  });
+}
 var getFavouriteMangas = function(favourites) {
-  console.log('Trying to find favourites');
-  console.log(favourites);
+  debug('getFavouriteMangas');
+  //console.log('Server Trying to ');
+  //console.log(favourites);
   var favArr = [];
   favourites.forEach(function(item) {
     favArr.push(item.mangaUrl);
@@ -122,11 +149,24 @@ var getFavouriteMangas = function(favourites) {
   }));
 }
 
+var getFavouriteMangasSorted = function(favourites) {
+  debug('getFavouriteMangasSorted');
+  //console.log('Trying to find favourites');
+  //console.log(favourites);
+  var favArr = [];
+  favourites.forEach(function(item) {
+    favArr.push(item.mangaUrl);
+  })
+  return Q(Manga.find({ mangaUrl: {$in: favArr}}).sort({"lastUpdated": -1}));
+}
 
 
+exports.getRecentlyUpdated = getRecentlyUpdated;
 exports.newMangaEntry = newMangaEntry;
 exports.getAllManga = getAllManga;
 exports.getMangas = getMangas;
 exports.getManga = getManga;
 exports.updateMangaEntry = updateMangaEntry;
 exports.getFavouriteMangas = getFavouriteMangas;
+exports.getFavouriteMangasSorted = getFavouriteMangasSorted;
+exports.insertOneManga = insertOneManga;

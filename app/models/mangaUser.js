@@ -4,6 +4,7 @@ var mongoose = require('mongoose');
 
 var mangaUserSchema = mongoose.Schema({
   userID          : String,
+  recentlyRead    : [String],
   mangas          : [{
     mangaUrl      : String,
     category      : [String],

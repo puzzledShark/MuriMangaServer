@@ -20,7 +20,8 @@
         "nightmare": "2.10.0",
         "jimp": "0.2.28",
         "q": "latest",
-        "socket.io": "~2.0.1"
+        "socket.io": "~2.0.1",
+        "node-schedule": "1.2.3"
     },
     "author": "Kenny Nguyen <kenimorri@gmail.com>",
     "description": "Muri Web Reader prototype"

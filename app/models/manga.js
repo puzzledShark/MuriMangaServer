@@ -3,7 +3,7 @@
 var mongoose = require('mongoose');
 
 var mangaSchema = mongoose.Schema({
-  mangaUrl      : String,
+  mangaUrl      : { type: String, unique: true },
   mangaName     : String,
   mangaAltName  : String,
   mangaDesc     : String,
@@ -12,6 +12,8 @@ var mangaSchema = mongoose.Schema({
   artist        : String,
   genres        : [String],
   lastUpdated   : Date,
+  lastChapter   : String,
+  lastChapterUrl: String,
   chapters      : [{
     chapterUrl  : String,
     chapterName : String,

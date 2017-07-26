@@ -19,6 +19,9 @@ var session      = require('express-session');
 
 var configDB = require('./config/database.js');
 var socketManager = require('./app/socketsManager');
+var scheduleManager = require('./app/scheduler')
+
+var debug = require('debug')('Muri')  
 
 // configuration ===============================================================
 mongoose.connect(configDB.url); // connect to our database
@@ -26,6 +29,7 @@ mongoose.connect(configDB.url); // connect to our database
 require('./config/passport')(passport); // pass passport for configuration
 
 socketManager.start(io);
+scheduleManager.init();
 
 // set up our express application
 app.use(morgan('dev')); // log every request to the console
@@ -34,6 +38,7 @@ app.use(bodyParser()); // get information from html forms
 app.use('/public', express.static('public'));
 app.use('/js', express.static('js'));
 app.use('/style', express.static('style'));
+app.use('/img', express.static('img'));
 
 app.set('view engine', 'ejs'); // set up ejs for templating
 

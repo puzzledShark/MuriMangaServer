@@ -1,3 +1,13 @@
+<!--
+user: Contains user information for header
+  can be null
+manga: contains general information about the manga
+  cannot be null
+userManga: contains information the USER had about the manga ( this means that the USER fav'd it in the past)
+  can be null
+-->
+
+
 <!-- views/index.ejs -->
 <!doctype html>
 <html>
@@ -7,6 +17,15 @@
     <style>
         body        { padding-top:80px; }
     </style>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+
+      var tpl = '<% if(locals.userManga){ %>foo defined<% }else{ %>foo undefined<% } %>';
+      console.log(tpl);
+
+
+
+    </script>
 </head>
 <body>
   <% include ./header.ejs %>
@@ -17,11 +36,12 @@
         <h1><img src="<%= manga.mangaImageUrl %>" style="height:200px"><%= manga.mangaName %></h1>
     </div>
     <div>
-      <% if(user) { %> 
-      <p> <span>☆⭐</span>
-        <a href="http://dokidoki.duckdns.org:8080/batoto/manga/<%= manga.mangaUrl %>?fav=true">Favourite?</a>
-      </p>
+      <!-- if user is logged in spawn the favourite set -->
+      <% if(locals.user) { %>
+        <button id='unFav' type="button"><h2>⭐ Remove from favourites</h2></button>
+        <button id='fav' type="button"><h2>☆ Add to favourites</h2></button>
       <% } %>
+
     <table id="myTable">
       <tr>
         <th> Manga Name </th>
@@ -46,13 +66,16 @@
       <tr>
         <th>Chapter Name</th>
         <th>Modified Chapter</th>
-        <th>Chapter Url </th>
+        <th> Bato.to Link </th>
         <th>Date</th>
         <th>Sort</th>
       </tr>
       <% manga['chapters'].forEach(function(item, index) { %>
-        <% if(!(typeof read === 'undefined')) { %>
-        <% if ( (read.indexOf(item.chapterUrl)) > -1 ) {%>
+        <% if(!(typeof userManga === 'undefined')) { 
+          var dateu = new Date(); 
+          dateu.setDate(dateu.getDate() - 1);
+        %>
+        <% if ( (userManga.chapters.indexOf(item.chapterUrl)) > -1 ) {%>
             <tr style="background-color: lightblue;">
               <% } else { %>
             <tr>
@@ -61,14 +84,46 @@
           <tr>
             <% } %>
           <td> <a href="http://dokidoki.duckdns.org:8080/batoto/manga/<%= manga.mangaUrl %>/<%=item.chapterUrl %>"> <%= item.chapterName %> </td>
-          <td> <a href="http://dokidoki.duckdns.org:8080/batoto/manga/<%= manga.mangaUrl %>/<%=item.chapterUrl %>?mod=true"> <%= item.chapterName %> </td>
-          <td> <a href="http://bato.to/reader#<%= item.chapterUrl %>"> http://bato.to/reader#<%= item.chapterUrl %></a> </td>
-          <td> <%= item.date %> </td>
+          <td> <a href="http://dokidoki.duckdns.org:8080/batoto/manga/<%= manga.mangaUrl %>/<%=item.chapterUrl %>?mod=true">Read Modified</td>
+          <td> <a href="http://bato.to/reader#<%= item.chapterUrl %>"> <%= item.chapterUrl %> </a> </td>
+          <td> <%= item.date.toLocaleString() %><% if( Date.parse(item.date) > dateu ) { %> <mark>NEW</mark> <% } %>  </td>
           <td> <%= item.sort %> </td>
         </tr>
       <% }); %>
     </table>
 </div>
 </main>
+<script>
+<% if(locals.user) { %>
+    var sockets = io.connect('http://dokidoki.duckdns.org:8080');
+    var tpl = '<% if(locals.userManga){ %>foo defined<% }else{ %>foo undefined<% } %>';
+    if(<% if(locals.userManga)  { %> <%= true %> <% } else { %> <%= false %> <% } %> ) {
+      $('#fav').hide();
+      $('#unFav').show();
+    }
+    else {
+      $('#unFav').hide();
+      $('#fav').show();
+    }
+    $( document ).ready(function() {
+      $('#fav').click(function() {
+        console.log('Fav');
+        sockets.emit('fav', window.location.href, "<%= user.google.id %>");
+      })
+      $('#unFav').click(function() {
+        sockets.emit('unFav', window.location.href, "<%= user.google.id %>");
+        console.log('unFav');
+      })
+    })
+    sockets.on('fav', function(val) {
+      $('#fav').hide();
+      $('#unFav').show();
+    })
+    sockets.on('unfav', function(val) {
+      $('#fav').hide();
+      $('#unFav').show();
+    })
+    <% } %>
+</script>
 </body>
 </html>

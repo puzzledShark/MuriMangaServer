@@ -7,24 +7,91 @@
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"> <!-- load fontawesome -->
     <style>
         body        { padding-top:80px; }
+        #mascot { background: url('/img/renchon.svg') no-repeat right bottom transparent; }
+
+        #mascot {
+            position: fixed;
+            z-index: 1;
+            bottom: 0;
+            right: 0;
+            width: 40vh;
+            max-width: 100%;
+            height: 40vh;
+            -webkit-tap-highlight-color: transparent;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        #mascot.custom-mascot {
+            background-size: contain;
+        }
     </style>
 </head>
 <body>
 <div class="container">
 
     <div class="jumbotron text-center">
-        <h1><span class="fa fa-lock"></span> Node Authentication</h1>
-
+        <h1><span class="fa fa-lock"></span> Muri Manga Reader</h1>
+        <% if(user) { %>
+        <h3>Logged in as: <%= user.google.name %> </h3>
+        <% } else { %>
         <p>Login with:</p>
         <a href="/auth/google" class="btn btn-danger"><span class="fa fa-google-plus"></span> Google</a>
-        <a href="http://dokidoki.duckdns.org:8080/batoto/searchResults" class="btn btn-danger"><span class="fa fa-google-plus"></span> MangaListPage</a>
-        <a href="http://dokidoki.duckdns.org:8080/batoto/favorites" class="btn btn-danger"><span class="fa fa-google-plus"></span> Favorites</a>
-    </div>
-    <form id="search" method="get" action="http://dokidoki.duckdns.org:8080/batoto/searchResults">
-        <input type="text" id="searchKeyword" name="searchKeyword">
+        <br/>
+        <% } %>
+        <a href="http://dokidoki.duckdns.org:8080/batoto/recentlyUpdated" class="btn btn-danger"></span>Recently Updated Manga</a>
+        <% if(user) { %>
+        <a href="http://dokidoki.duckdns.org:8080/batoto/favorites" class="btn btn-danger"></span> Favorites </a>
+        <a href="http://dokidoki.duckdns.org:8080/batoto/favoritesRecentlyUpdated" class="btn btn-danger"></span> Favorites Recently Updated</a>
+        <br/>
+        <% } %>
+        <form id="search" method="get" action="http://dokidoki.duckdns.org:8080/batoto/searchResults">
+        <input type="text" placeholder="Search For Manga" id="searchKeyword" name="searchKeyword">
         <input type="submit" >
-    </form>
+        </form>
+    </div>
+    <!--
+    <script src="/js/jscolor.min.js"></script>
 
+    Color: <input id="colord" class="jscolor" value="ab2567" onchange="functionChange()">
+    -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script>
+        $( document ).ready(function() {
+            console.log("Ready");
+
+        
+        });
+        function functionChange() {
+            console.log("?")
+            console.log($('input.jscolor').val())
+            var col = "#" + $('input.jscolor').val()
+            $('body').css('background-color', col )
+        }
+    </script>
 </div>
+<audio id="nyanpassu" hidden="" preload="none">
+    <source src="https://a.doko.moe/sewang.mp3" type="audio/mpeg">
+</audio>
+<div id="mascot" class="hide-xs" onclick="playVoice();"></div>
+<script> 
+function playVoice() {
+    var explosion = document.getElementById("explosion");
+    var nyanpassu = document.getElementById("nyanpassu");
+    var kawaii    = document.getElementById("kawaii");
+    if (explosion) {
+        explosion.volume = 0.2;
+        explosion.play();
+    }
+    else if (kawaii) {
+        kawaii.volume = 0.2;
+        kawaii.play();
+    }
+    else {
+        nyanpassu.volume = 0.2;
+        nyanpassu.play();
+    }
+}
+</script>
 </body>
 </html>

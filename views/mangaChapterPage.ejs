@@ -7,7 +7,7 @@
     <style>
         body        { padding-top:80px; }
         img {
-          background: url('/public/loading.gif') no-repeat;
+          background: url('/img/loading.gif') no-repeat;
         }
     </style>
     <script src="/socket.io/socket.io.js"></script>
@@ -23,7 +23,7 @@
       // this element is now inside browser viewport
         console.log('Appear Worked');
       });
-
+/*
       <% if(user) { %>
 
       $('.mangaPage').attr('style', "width:<%= user.pageWidth %>%")
@@ -35,6 +35,7 @@
         sockets.emit('widthChange', tmpVal, "<%=user.google.id %>");
       })
       <% } %>
+      */
     });
     //Super lazy fix since I don't really check for file extension when I find the images
     var imageFix = function(element) {
@@ -50,7 +51,7 @@
         element.src = element.src.split('.jpeg')[0] + '.png';
       }
     }
-
+<!--/*
     <% if(user) { %>
     var sockets = io.connect('http://dokidoki.duckdns.org:8080');
 
@@ -67,6 +68,8 @@
       }
     })
     <% } %>
+
+    -->*/
 </script>
 
 
@@ -113,20 +116,23 @@
     <img id="image<%= i %>" class='mangaPage center' style='width:100%' src='<%= tmp[0] %>img0000<%= i %>.png' onerror="imageFix(this);">
 <% } 
 } %>
-
-
 <div style="display: in-line">
 <% if(data.previousPage) { %>
-<button style="width:50%;height:300px" type="button">
-<p><a href="./<%= data.previousPage.split('#')[1] %>"> Previous Chapter </a> </p>
-</button>
+<a href="./<%= data.previousPage.split('#')[1] %>"> 
+<button style="width:40%;height:300px" type="button">
+<h2>Previous Chapter</h2>
+</button></a>
 <% } %>
+<a href="./"><button style="width:19%;height:300px" type="button"><h2>Back to manga</h2></button></a>
 <% if(data.nextPage) { %>
-<button style="width:49%;height:300px" type="button">
-<p><a href="./<%= data.nextPage.split('#')[1] %>"> Next Chapter </a> </p>
-</button>
+<a href="./<%= data.nextPage.split('#')[1] %>"> 
+<button style="width:40%;height:300px" type="button">
+<h2>Next Chapter</h2>
+</button></a>
 <% } %>
+
 </div>
+
 </main>
 </body>
 </html>
